@@ -1,0 +1,91 @@
+<html>
+
+<head>
+<title>Inzendopdracht 051R3</title>
+<meta http-equiv="content-type" content="text/html; charset=iso-8859-1" />
+<meta name="generator" content="HAPedit 3.1">
+</head>
+<body bgcolor="#FFFFFF">
+<?php
+
+function bingo_kaart(){                 //vul de bingokaart met random getallen
+
+for ($rij = 1; $rij < 7; $rij++){      //geeft 6 rijen
+        $charset = "0123456789";          //elke rij begint met volledige charset
+    for ($kolom = 1; $kolom < 7; $kolom++){   //maak 6 keer een getal
+         $length = strlen($charset);           //kijk hoeveel getallen beschikbaar zijn
+         $position = mt_rand(0, $length - 1);   //kies een random-positie uit hoeveelheid getallen
+         $getal = $charset[$position];          //stop getal aan de hand van positie in variabele $getal
+         $bingokaart[$rij][$kolom] = "$rij$getal";   //plak het randomgetal aan het rijnummer
+         $charset = str_replace($getal, "", $charset);  //haal het getal uit de charset voordat een volgend getal wordt gemaakt
+          }
+     $bingokaart[$rij][7] = 0;               //voeg een 7de kolom met nullen toe
+
+     }
+     $bingokaart[] = array_fill(1, 6, '0'); //voeg de zevende rij met 6 nullen toe
+            return($bingokaart);
+}
+
+
+function print_kaart($result) {            //zorgt voor printen bingokaart
+echo "Bingokaart waarop BINGO is gevallen: <br><table  border='1' title='Bingokaart'>"; //begin tabel en geeft titel en randen
+for ($row = 1; $row <= 6; $row++){           //loop 6 keer een rij langs
+echo "<TR>";                                   //begin rij met tr
+for ($kolom_waarde = 1; $kolom_waarde <= 6; $kolom_waarde++){    //loop 6 keer een positie in rij langs
+    if ($result[$row][7] == 6 or $result[7][$kolom_waarde] == 6){   //check of er een bingo is gevallen in deze positie
+       echo "<td bgcolor = green>". $result[$row][$kolom_waarde] . "</td>"; //zo ja, maak groen tabelvakje met waarde
+          }
+    else {
+         echo "<td>" . $result[$row][$kolom_waarde] . "</td>";     //zo niet, maak tabelvakje met waarde
+             }
+         }
+     echo "</TR>";                                     //sluit de rij af
+     }                                                //sluit de tabel af
+
+echo "</table>";
+}
+
+mt_srand((double)microtime() * 1000000);   //kiest random getallen
+$getrokken = array();
+
+$result = bingo_kaart();   //maakt een array waarin de bingo kaart zit
+$bingo = FALSE;
+
+while (!$bingo){                           //zolang er geen 6 getrokken getallen op een rij of kolom staan
+$bingo_getal = mt_rand(10,69);    //trek een bingogetal
+if (!in_array($bingo_getal,$getrokken)){ //controleer of het getal al getrokken is, zo niet:
+     $getrokken[] = $bingo_getal;      //voeg getal aan getrokken toe
+     for ($row = 1; $row <= 6; $row++){         //doorloop alle rijen
+         $kolom_waarde = array_search($bingo_getal, $result[$row]);       //kijk of het getrokken getal op de bingokaart staat
+         if ($kolom_waarde > 0 && $kolom_waarde < 7){                     //als kolomwaarde tussen 0 en 7 zit, staat getal op de bingokaart
+            $result[7][$kolom_waarde] = $result[7][$kolom_waarde]+1;         // zo ja, optellen bij zevende rij en zevende kolom
+            $result[$row][7] = $result[$row][7]+1;
+                if ($result[$row][7] == '6' or $result[7][$kolom_waarde] == '6'){   //is er opgeteld tot 6?
+                    $bingo = TRUE;             // maak van $bingo true zodat de while stopt
+                        }
+                    }
+                }
+            }
+}
+
+
+$printen = print_kaart($result);                            //print de bingokaart
+
+?>
+<title>getrokken getallen</title>Getrokken getallen:<br>
+<?php
+$totaal = count($getrokken);                                   //tel hoeveel getallen er getrokken zijn
+for ($xplaatsen = 0; $xplaatsen < $totaal; $xplaatsen++){       //zovaak als er getallen getrokken zijn:
+    echo " ".$getrokken[$xplaatsen];                             //print de waardes met een spatie er tussen
+}
+?>
+
+<BR><BR><title>Aantal getrokken getallen</title>Aantal getrokken getallen:
+<?php
+echo $totaal;                //print het aantal getrokken getallen
+?>
+
+
+</body>
+
+</html>
